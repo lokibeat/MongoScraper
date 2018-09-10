@@ -4,6 +4,7 @@ var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
 var cheerio = require("cheerio");
 var request = require("request");
+var exphbs = require("express-handlebars");
 var axios = require("axios");
 var logger = require("morgan");
 
@@ -22,8 +23,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+// Set mongoose to leverage built in JavaScript ES6 Promises
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/mongoscraperappdb");
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
+//set engine and default for handlebars
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 
 
 // routes homepage
